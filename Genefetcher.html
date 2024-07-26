@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Genetic Code Fetcher</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e0f7fa;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            position: relative;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: 1px solid #b2ebf2;
+            position: relative;
+            z-index: 1;
+        }
+        h1 {
+            text-align: center;
+            color: #00796b;
+            margin-bottom: 20px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 18px;
+            color: #004d40;
+        }
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 12px;
+            border: 1px solid #b2ebf2;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        input[type="submit"] {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background-color: #00796b;
+            color: #ffffff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: #004d40;
+        }
+        pre {
+            background-color: #f1f8e9;
+            padding: 20px;
+            border-radius: 8px;
+            overflow: auto;
+            white-space: pre-wrap; /* Wrap long lines */
+            border: 1px solid #c8e6c9;
+            color: #1b5e20;
+            font-family: 'Courier New', monospace;
+        }
+        /* Loading Screen Styles */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .loading-spinner {
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #00796b; /* Darker color */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+    <div class="container">
+        <h1>Genetic Code Fetcher</h1>
+        <form id="fetchForm">
+            <label for="gene">Enter Gene ID:</label>
+            <input type="text" id="gene" name="gene" placeholder="e.g., NM_001301717">
+            <input type="submit" value="Fetch">
+        </form>
+        <h2>Genetic Code:</h2>
+        <pre id="result">Enter a Gene ID and click "Fetch" to see the result here.</pre>
+    </div>
+
+    <script>
+        document.getElementById('fetchForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const geneId = document.getElementById('gene').value;
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (geneId) {
+                loadingOverlay.style.display = 'flex';
+                fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nucleotide&id=${geneId}&rettype=fasta&retmode=text`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.text();
+                    })
+                    .then(data => {
+                        document.getElementById('result').textContent = data;
+                        loadingOverlay.style.display = 'none';
+                    })
+                    .catch(error => {
+                        document.getElementById('result').textContent = 'Error fetching data: ' + error.message;
+                        loadingOverlay.style.display = 'none';
+                    });
+            } else {
+                document.getElementById('result').textContent = 'Please enter a Gene ID.';
+            }
+        });
+    </script>
+</body>
+</html>
